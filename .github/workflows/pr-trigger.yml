@@ -1,0 +1,16 @@
+name: Pull Request Trigger
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  call-build:
+    name: Build PR ${{ github.ref }}
+    permissions:
+      contents: write
+      actions: write
+
+    uses: ./.github/workflows/build.yml
+    with:
+      tag_name: ${{ github.event.pull_request.head.sha }}

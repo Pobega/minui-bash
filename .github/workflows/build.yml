@@ -1,0 +1,56 @@
+name: Callable build for MinUI Bash
+
+on:
+  workflow_call:
+    inputs:
+      tag_name:
+        description: 'The Git Tag (e.g., v1.0.0)'
+        required: true
+        type: string
+    outputs:
+      artifact_name:
+        description: "The name of the uploaded artifact."
+        value: ${{ jobs.build.outputs.artifact_name_out }}
+
+jobs:
+  build:
+    name: Build aarch64 Bash
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+
+    outputs:
+      artifact_name_out: ${{ steps.set_output.outputs.artifact_name }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.tag_name }}
+
+    - name: Set Artifact Output Name
+      id: set_output
+      run: |
+        echo "artifact_name=minui-bash-${{ github.sha }}" >> $GITHUB_OUTPUT
+
+    - name: Fetch latest toolchain
+      run: make pull
+
+    - name: Fetch source
+      run: make -f makefile.github fetch
+
+    - name: Configure source
+      run: make -f makefile.github configure
+
+    - name: Make bash
+      run: make -f makefile.github compile
+
+    - name: Dist a binary
+      run: make -f makefile.github dist
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.set_output.outputs.artifact_name }}
+        path: build/tg5040
+        retention-days: 7
