@@ -14,20 +14,26 @@ $(BASH_SOURCE):
 	mkdir -p build/
 	wget https://ftp.gnu.org/gnu/bash/$(BASH_SOURCE) -O $(BASH_SOURCE)
 
-$(BUILD_DIR)/configure: $(BASH_SOURCE)
+$(BUILD_DIR)/extract: $(BASH_SOURCE) $(BUILD_DIR)/extract-only
+$(BUILD_DIR)/extract-only:
 	@echo "Extracting $(BASH_SOURCE)..."
 	tar -xf $(BASH_SOURCE) -C build
 	rm $(BASH_SOURCE)
 
-$(PRODUCT): $(BUILD_DIR)/configure
+$(BUILD_DIR)/configure: $(BUILD_DIR)/extract $(BUILD_DIR)/configure-only
+$(BUILD_DIR)/configure-only:
 	@echo "Configuring bash..."
 	(cd $(BUILD_DIR) && \
 	./configure $(CONFIGURE_ARGS))
 
+$(BUILD_DIR)/make: $(BUILD_DIR)/configure $(BUILD_DIR)/make-only
+$(BUILD_DIR)/make-only:
 	@echo "Compiling bash..."
 	(cd $(BUILD_DIR) && \
 	make)
 
+$(PRODUCT): $(BUILD_DIR)/make $(PRODUCT)-only
+$(PRODUCT)-only:
 	@echo "Copying final executable and cleaning up..."
 	mkdir -p build/tg5040
 	cp $(BUILD_DIR)/$(TARGET) $(PRODUCT)

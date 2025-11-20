@@ -17,8 +17,17 @@ jobs:
     - name: Fetch latest toolchain
       run: make pull
 
-    - name: Build bash
-      run: make buildonly
+    - name: Fetch source
+      run: make -f makefile.github fetch
+
+    - name: Configure source
+      run: make -f makefile.github configure
+
+    - name: Make bash
+      run: make -f makefile.github compile
+
+    - name: Dist a binary
+      run: make -f makefile.github dist
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

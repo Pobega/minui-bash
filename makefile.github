@@ -1,0 +1,21 @@
+# These steps are used for Github actions
+-include makefile
+
+fetch:
+	docker run --name build_container_1 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) $(IMAGE_NAME) /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/extract'
+	docker commit build_container_1 minui_bash:v1
+	docker rm build_container_1
+
+configure:
+	docker run --name build_container_2 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v1 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/configure-only'
+	docker commit build_container_2 minui_bash:v2
+	docker rm build_container_2
+
+compile:
+	docker run --name build_container_3 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v2 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/make-only'
+	docker commit build_container_3 minui_bash:v3
+	docker rm build_container_3
+
+dist:
+	docker run --rm -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v3 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/tg5040/bash-only'
+	docker rmi minui_bash:v1 minui_bash:v2 minui_bash:v3 -f
