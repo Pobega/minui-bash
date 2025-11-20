@@ -13,3 +13,35 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       tag_name: ${{ github.event.release.tag_name }}
+
+  deploy-release:
+    needs: call-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: minui-bash
+          path: ./release-assets/
+
+      - name: Zip artifacts
+        id: compress
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          ZIP_NAME="minui-bash-${TAG}.zip"
+
+          echo "Compressing files into $ZIP_NAME..."
+
+          cd ./release-assets/
+
+          zip -r -j ../$ZIP_NAME .
+          echo "zip_path=$ZIP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Upload Assets to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: ${{ steps.compress.outputs.zip_path }}
