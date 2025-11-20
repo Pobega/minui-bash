@@ -21,17 +21,12 @@ jobs:
       actions: write
 
     outputs:
-      artifact_name_out: ${{ steps.set_output.outputs.artifact_name }}
+      artifact_name_out: minui-bash-${{ inputs.tag_name }}.zip
 
     steps:
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.tag_name }}
-
-    - name: Set Artifact Output Name
-      id: set_output
-      run: |
-        echo "artifact_name=minui-bash-${{ github.sha }}" >> $GITHUB_OUTPUT
 
     - name: Fetch latest toolchain
       run: make pull
@@ -48,9 +43,14 @@ jobs:
     - name: Dist a binary
       run: make -f makefile.github dist
 
+    - name: Rename and Prepare
+      run: |
+        sudo mv ./build/tg5040/bash ./minui-bash-aarch64
+        sudo chmod 755 ./minui-bash-aarch64
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.set_output.outputs.artifact_name }}
-        path: build/tg5040
+        name: minui-bash
+        path: ./minui-bash-aarch64
         retention-days: 7

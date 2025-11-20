@@ -13,3 +13,24 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       tag_name: ${{ github.event.release.tag_name }}
+
+  deploy-release:
+    needs: call-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: minui-bash
+          path: ./release-assets/
+
+      - name: Upload Assets to Release
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: ./release-assets/minui-bash-aarch64
