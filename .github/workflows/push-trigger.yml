@@ -1,0 +1,17 @@
+name: Push Trigger
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  call-build:
+    name: Build ${{ github.ref }}
+    permissions:
+      contents: write
+      actions: write
+    uses: ./.github/workflows/build.yml
+    with:
+      tag_name: ${{ github.ref }}
