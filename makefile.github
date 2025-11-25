@@ -7,7 +7,7 @@
 
 # Fetches the bash source code and commits the state to a Docker image (minui_bash:v1).
 fetch:
-	docker run --name build_container_1 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) $(IMAGE_NAME) /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/extract'
+	docker run --name build_container_1 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) $(IMAGE_NAME) /bin/bash -c 'apt-get update && apt install -y gnupg && . ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/extract'
 	docker commit build_container_1 minui_bash:v1
 	docker rm build_container_1
 

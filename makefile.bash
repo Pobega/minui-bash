@@ -3,6 +3,7 @@
 
 BASH_VERSION = 5.2
 BASH_SOURCE = bash-$(BASH_VERSION).tar.gz
+BASH_SOURCE_SIG = $(BASH_SOURCE).sig
 BUILD_DIR = build/bash-$(BASH_VERSION)
 CONFIGURE_ARGS = --without-bash-malloc --host=aarch64-pc-linux-gnu
 
@@ -12,14 +13,25 @@ PRODUCT = build/$(PLATFORM)/bash
 .PHONY: all
 all: $(PRODUCT)
 
+$(BASH_SOURCE_SIG):
+	@echo "Fetching bash source signature..."
+	wget https://ftp.gnu.org/gnu/bash/$(BASH_SOURCE_SIG) -O $(BASH_SOURCE_SIG)
+
 $(BASH_SOURCE):
 	@echo "Fetching bash source version $(BASH_VERSION)..."
-	mkdir -p build/
 	wget https://ftp.gnu.org/gnu/bash/$(BASH_SOURCE) -O $(BASH_SOURCE)
 
-$(BUILD_DIR)/extract: $(BASH_SOURCE) $(BUILD_DIR)/extract-only
+.PHONY: verify-bash-source
+verify-bash-source: $(BASH_SOURCE) $(BASH_SOURCE_SIG)
+	@echo "Verifying bash source with GPG signature..."
+	gpg --list-keys --with-colons 64EA74AB > /dev/null 2>&1 || gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 64EA74AB
+	gpg --batch --verify $(BASH_SOURCE_SIG) $(BASH_SOURCE)
+	rm $(BASH_SOURCE_SIG)
+
+$(BUILD_DIR)/extract: verify-bash-source $(BUILD_DIR)/extract-only
 $(BUILD_DIR)/extract-only:
 	@echo "Extracting $(BASH_SOURCE)..."
+	mkdir -p build/
 	tar -xf $(BASH_SOURCE) -C build
 	rm $(BASH_SOURCE)
 
@@ -40,10 +52,10 @@ $(PRODUCT)-only:
 	@echo "Copying final executable and cleaning up..."
 	mkdir -p build/$(PLATFORM)
 	cp $(BUILD_DIR)/$(TARGET) $(PRODUCT)
-	chown 1000:1000 $(PRODUCT)
+	rm $(BUILD_DIR)/$(TARGET)
 	rm -rf $(BUILD_DIR)
 
 .PHONY: clean
 clean:
-	rm -f $(PRODUCT)
 	rm -rf build/bash-*
+	rm -rf build/$(PLATFORM)
