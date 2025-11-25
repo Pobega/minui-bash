@@ -1,21 +1,30 @@
-# These steps are used for Github actions
+# This makefile is specifically designed for GitHub Actions workflows.
+# It breaks down the bash build process into granular, cachable Docker steps
+# to optimize CI/CD performance by layering Docker image commits.
+
+# Include the main makefile to access common variables like BASH_VERSION, HOST_WORKSPACE, etc.
 -include makefile
 
+# Fetches the bash source code and commits the state to a Docker image (minui_bash:v1).
 fetch:
 	docker run --name build_container_1 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) $(IMAGE_NAME) /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/extract'
 	docker commit build_container_1 minui_bash:v1
 	docker rm build_container_1
 
+# Configures the bash source code and commits the state to a new Docker image (minui_bash:v2).
 configure:
 	docker run --name build_container_2 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v1 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/configure-only'
 	docker commit build_container_2 minui_bash:v2
 	docker rm build_container_2
 
+# Compiles the bash source code and commits the state to a new Docker image (minui_bash:v3).
 compile:
 	docker run --name build_container_3 -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v2 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/bash-$(BASH_VERSION)/make-only'
 	docker commit build_container_3 minui_bash:v3
 	docker rm build_container_3
 
+# Finalizes the build by distributing the bash binary from the last Docker image (minui_bash:v3).
+# This also cleans up the intermediate Docker images.
 dist:
-	docker run --rm -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v3 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/tg5040/bash-only'
+	docker run --rm -v $(HOST_WORKSPACE):$(GUEST_WORKSPACE) minui_bash:v3 /bin/bash -c '. ~/.bashrc && cd /root/workspace && make -f makefile.bash build/$(PLATFORM)/bash-only PLATFORM=$(PLATFORM)'
 	docker rmi minui_bash:v1 minui_bash:v2 minui_bash:v3 -f
