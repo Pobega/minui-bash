@@ -1,8 +1,7 @@
 # This makefile contains the core logic for building the bash binary.
 # It is designed to be run inside a Docker container by the main 'makefile'.
 
-# Get shared variables from the main makefile
--include makefile
+-include config.mk
 
 BASH_SOURCE = bash-$(BASH_VERSION).tar.gz
 BASH_SOURCE_SIG = $(BASH_SOURCE).sig
