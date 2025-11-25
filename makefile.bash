@@ -1,10 +1,13 @@
+# This makefile contains the core logic for building the bash binary.
+# It is designed to be run inside a Docker container by the main 'makefile'.
+
 BASH_VERSION = 5.2
 BASH_SOURCE = bash-$(BASH_VERSION).tar.gz
 BUILD_DIR = build/bash-$(BASH_VERSION)
 CONFIGURE_ARGS = --without-bash-malloc --host=aarch64-pc-linux-gnu
 
 TARGET = bash
-PRODUCT = build/tg5040/bash
+PRODUCT = build/$(PLATFORM)/bash
 
 .PHONY: all
 all: $(PRODUCT)
@@ -35,7 +38,7 @@ $(BUILD_DIR)/make-only:
 $(PRODUCT): $(BUILD_DIR)/make $(PRODUCT)-only
 $(PRODUCT)-only:
 	@echo "Copying final executable and cleaning up..."
-	mkdir -p build/tg5040
+	mkdir -p build/$(PLATFORM)
 	cp $(BUILD_DIR)/$(TARGET) $(PRODUCT)
 	chown 1000:1000 $(PRODUCT)
 	rm -rf $(BUILD_DIR)
