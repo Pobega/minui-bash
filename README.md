@@ -20,3 +20,9 @@ make build
 ```
 
 The resulting binary will be in the `build/` directory.
+
+## Thanks
+
+* [frysee](https://github.com/frysee) for [NextUI](https://github.com/LoveRetro/NextUI) and the cross-compile Docker image used to build bash
+* [ben16w](https://github.com/ben16w) for [minui-portmaster](https://github.com/ben16w/minui-portmaster)
+* [josegonzalez](https://github.com/josegonzalez) for your `minui-*` repositories, which this is (loosely) based on.
