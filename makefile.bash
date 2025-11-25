@@ -1,7 +1,9 @@
 # This makefile contains the core logic for building the bash binary.
 # It is designed to be run inside a Docker container by the main 'makefile'.
 
-BASH_VERSION = 5.2
+# Get shared variables from the main makefile
+-include makefile
+
 BASH_SOURCE = bash-$(BASH_VERSION).tar.gz
 BASH_SOURCE_SIG = $(BASH_SOURCE).sig
 BUILD_DIR = build/bash-$(BASH_VERSION)
