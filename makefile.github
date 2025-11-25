@@ -2,8 +2,7 @@
 # It breaks down the bash build process into granular, cachable Docker steps
 # to optimize CI/CD performance by layering Docker image commits.
 
-# Include the main makefile to access common variables like BASH_VERSION, HOST_WORKSPACE, etc.
--include makefile
+-include config.mk
 
 # Fetches the bash source code and commits the state to a Docker image (minui_bash:v1).
 fetch:

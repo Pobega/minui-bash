@@ -2,12 +2,7 @@
 # build operations. It orchestrates the use of 'makefile.bash' inside
 # a Docker container.
 
-BASH_VERSION = 5.2
-HOST_WORKSPACE = $(shell pwd)
-GUEST_WORKSPACE = /root/workspace
-
-PLATFORM ?= tg5040
-IMAGE_NAME = ghcr.io/loveretro/$(PLATFORM)-toolchain:modernize
+-include config.mk
 
 .PHONY: all build build-only shell pull clean
 
